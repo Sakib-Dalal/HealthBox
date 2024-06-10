@@ -4,18 +4,34 @@
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
           <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
-            <img src="./../static/BlackBox Logo removebg.png" height="30" class="px-2">
+            <img src="./../static/Heart.svg" height="50" class="px-1">
 
-            <span class="fs-4">BlackBox</span>
+            <span class="fs-2 text-danger fw-light">HealthBox</span>
           </a>
     
           <ul class="nav nav-pills">
-            <li class="nav-item"><a href="#"><button type="button" class="btn btn-dark">Features</button></a></li>
-            <li class="nav-item"><a href="{{ url_for('register') }}"><button type="button" class="btn btn-dark">Register</button></a></li>
-            <li class="nav-item"><a href="#"><button type="button" class="btn btn-dark">About Us</button></a></li>
+            <li class="nav-item"><a href="{{ url_for('features') }}"><button type="button" class="btn text-danger fw-normal fs-5">Features</button></a></li>
+            <li class="nav-item"><a href="{{ url_for('register') }}"><button type="button" class="btn text-danger fw-normal fs-5">Register</button></a></li>
+            <li class="nav-item"><a href="{{ url_for('aboutus') }}"><button type="button" class="btn text-danger fw-normal fs-5">About Us</button></a></li>
           </ul>
         </header>
 
-    </div>
+<!-- Form -->
+        <div class="text-danger mx-5 mt-5 mb-5">
+          
+          <h1 class="fw-light mb-4"> <img src="../static/login.svg" alt="login image" height="50" /> Login</h1>
+          <form>
+            <div class="mb-4">
+              <label for="exampleInputEmail1" class="form-label text-danger">Email address</label>
+              <input type="email" class="form-control" placeholder="example@gmail.com" id="exampleInputEmail1" aria-describedby="emailHelp">
+              <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+            </div>
+            <div class="mb-5">
+              <label for="exampleInputPassword1" class="form-label">Password</label>
+              <input type="password" class="form-control" placeholder="password" id="exampleInputPassword1">
+            </div>
+            <button type="submit" class="btn btn-outline-danger">Submit</button>
+          </form>
+        </div>
 
 {% include "footer.html" %}

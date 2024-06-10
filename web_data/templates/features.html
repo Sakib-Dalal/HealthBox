@@ -1,3 +1,21 @@
 {% include "header.html" %}
 
+    <!--Header-->
+    <div class="container">
+        <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+          <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+            <!-- <img src="./../static/BlackBox Logo removebg.png" height="30" class="px-2"> -->
+            <img src="./../static/Heart.svg" height="50" class="px-1">
+
+            <span class="fs-2 text-danger fw-light">HealthBox</span>
+          </a>
+    
+          <ul class="nav nav-pills">
+            <li class="nav-item"><a href="{{ url_for('features') }}"><button type="button" class="btn text-danger fw-normal fs-5">Features</button></a></li>
+            <li class="nav-item"><a href="{{ url_for('login') }}"><button type="button" class="btn text-danger fw-normal fs-5">Login</button></a></li>
+            <li class="nav-item"><a href="{{ url_for('register') }}"><button type="button" class="btn text-danger fw-normal fs-5">Register</button></a></li>
+            <li class="nav-item"><a href="{{ url_for('aboutus') }}"><button type="button" class="btn text-danger fw-normal fs-5">About Us</button></a></li>
+          </ul>
+        </header>
+
 {% include "footer.html" %}
