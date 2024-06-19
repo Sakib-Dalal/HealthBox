@@ -1,7 +1,7 @@
 from machine import Pin
 import time
 
-led_pin = Pin(2, Pin.OUT)
+led_pin = Pin('LED', Pin.OUT)
 
 # LED Class
 class LED:
@@ -12,7 +12,7 @@ class LED:
         time.sleep(1)
 
         
-    # Turn LEF Off
+    # Turn LED Off
     def led_off(self):
         print("LED OFF")
         led_pin.value(1)

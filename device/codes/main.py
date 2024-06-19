@@ -1,6 +1,7 @@
 from machine import Pin
 import network
 import time
+import _thread
 
 from BlackBox_pkg.wifi_network import WiFi
 
