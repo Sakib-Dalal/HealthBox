@@ -5,9 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 
-
 app = Flask(__name__)
-
 
 # Create Database
 class Base(DeclarativeBase):
