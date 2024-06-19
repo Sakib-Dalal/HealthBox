@@ -1,0 +1,62 @@
+{% include "header.html" %}
+
+    <!--Header-->
+    <div class="container">
+      <nav class="navbar navbar-expand-lg bg-body-light border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand fs-2 text-danger fw-light" href="/">
+                    <img src="./../static/Heart.svg" height="55" alt="logo" style="margin-top: -5px;" class="d-inline-block align-text-center align-items-center"> 
+                    HealthBox
+            </a>
+          <button class="navbar-toggler border-danger" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                
+                <!--Logout-->
+                <li class="nav-item">
+                    <!-- <a aria-current="page" href="{{ url_for('logout') }}">
+                        <button type="button" class="btn text-danger fs-5 mx-2">
+                            Logout
+                        </button>
+                    </a> -->
+                    <button type="button" class="btn text-danger fs-5 mx-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        Logout
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Conformation</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Conform your logout.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                <a aria-current="page" href="{{ url_for('logout') }}">
+                                    <button type="button" class="btn btn-danger">Yes</button>
+                                </a>
+                            </div>
+                        </div>
+                        </div>
+
+                    </div>
+                </li>
+
+            </ul>               
+          </div>
+        </div>
+      </nav>
+
+    <div class="mt-5 p-3 bg-danger bg-opacity-10 border border-danger border-start-0 rounded-end text-secondary fs-5 fw-light">
+        Welcome {{ name }}
+    </div>
+   
+<!--https://getbootstrap.com/docs/5.3/components/offcanvas/-->
+      
+
+{% include "footer.html" %}
