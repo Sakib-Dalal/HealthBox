@@ -1,0 +1,49 @@
+{% include "header.html" %}
+
+    <!--Header-->
+    <div class="container">
+      <nav class="navbar navbar-expand-lg bg-body-light border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand fs-2 text-danger fw-light" href="#">
+                    <img src="./../static/Heart.svg" height="55" alt="logo" style="margin-top: -5px;" class="d-inline-block align-text-center align-items-center"> 
+                    HealthBox
+            </a>
+        </div>
+      </nav>
+
+    
+    <div class="mt-4 mb-4 p-3 bg-danger bg-opacity-10 border border-danger border-start-0 rounded-end text-secondary fs-5 fw-light">
+        Welcome {{ email }}! Add New Device Here.
+    </div>
+
+    <!-- Form -->
+    <div class="text-danger mx-5 mt-5 mb-5">
+          
+        <!-- <h1 class="fw-light mb-4"> <img src="../static/login.svg" alt="login image" height="50" />Add HealthBox Device</h1> -->
+
+        <!--Flash check-->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <p style="color: gray;">{{ message }}</p>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="#" method="post">
+          <div class="mb-4">
+            <label for="exampleInputEmail1" class="form-label text-danger">Conform email address</label>
+            <input type="email" name="email" required="required" class="form-control" placeholder="{{ email }}" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="exampleInputEmail1" class="form-label text-danger">Device Name</label>
+            <input type="string" name="device_name" required="required" class="form-control" placeholder="HealthBox 1">
+          </div>
+
+          <button type="submit" class="btn btn-outline-danger">Add Device</button>
+        </form>
+      </div>
+
+{% include "footer.html" %}

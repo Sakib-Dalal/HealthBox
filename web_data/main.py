@@ -36,6 +36,8 @@ class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(250), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(250), nullable=False)
+    device: Mapped[str] = mapped_column(String(250), nullable=True)
+    device_API: Mapped[str] = mapped_column(String(250), nullable=True)
 
 with app.app_context():
     db.create_all()
@@ -111,8 +113,18 @@ def features():
 @login_required
 def userpage():
     print(current_user.email)
+    print(current_user.device)
+    print(current_user.device_API)
     # Passing the name from the current_user
-    return render_template('userpage.html', name=current_user.email)
+    return render_template('userpage.html', name=current_user.email, device=current_user.device, device_API=current_user.device_API)
+
+# add new device page
+@app.route(f'/new_device/<email>')
+@login_required
+def new_device(email):
+    return render_template('new_device.html', email=email)
+
+
 
 # Logout Page
 @app.route('/logout')
