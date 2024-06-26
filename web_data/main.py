@@ -46,6 +46,38 @@ with app.app_context():
 # Home Page
 @app.route('/')
 def home():
+    # to get user data
+    s = db.get_or_404(User, 1)
+    print(s.email)
+    print(s.password)
+    print(s.device)
+    print(s.device_API)
+   
+   # to get all users list
+    s = db.session.execute(db.select(User).order_by(User.id))
+    r = s.scalars()
+    for user in r:
+        print(user.id, user.email, user.password, user.device, user.device_API)
+
+    # read perticular record
+    s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
+    print(s.id)
+    print(s.email)
+    print(s.password)
+
+    # update record
+    s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
+    s.email = 'sakib@gmail.com' # update value
+    print("updated value")
+    db.session.commit()
+
+    # update record
+    s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
+    s.device = "Device 1" # update value
+    s.device_API = "D1"
+    print("updated value")
+    db.session.commit()
+
     return render_template('index.html')
 
 # Login Page
@@ -115,15 +147,47 @@ def userpage():
     print(current_user.email)
     print(current_user.device)
     print(current_user.device_API)
+    
     # Passing the name from the current_user
-    return render_template('userpage.html', name=current_user.email, device=current_user.device, device_API=current_user.device_API)
+    return render_template('userpage.html', name=current_user.email, device=[current_user.device], device_API=[current_user.device_API])
 
 # add new device page
-@app.route(f'/new_device/<email>')
+@app.route('/new_device/<email>')
 @login_required
 def new_device(email):
     return render_template('new_device.html', email=email)
 
+# display api key
+@app.route('/display_API/<email>/<device_name>/<API_key>')
+def display_api(email, device_name, API_key):
+    return render_template("display_api.html", email=email, device_name=device_name, API_key=API_key)
+
+# create new device database page
+@app.route('/register_new_device/<name>', methods=['GET', 'POST'])
+def register_new_device(name):
+    if request.method == 'POST':
+        email = request.form.get('email')
+        device_name = request.form.get('device_name')
+        result = db.session.execute(db.select(User).where(User.email == email))
+        user = result.scalar()
+        api = f"{email}-{device_name}"
+
+        if name == email:
+
+            API_key = generate_password_hash(api, method='pbkdf2:sha256', salt_length=8)
+            # new_user = User(
+            #     email = request.form.get('email'),
+            #     password = hash_and_salted_password
+            # )
+            # db.session.add(new_user)
+            # db.session.commit()
+            # Can redirect() and get name from the current_user
+            # return redirect(url_for('display_api', email=email, device_name=device_name, API_key=API_key))
+            return render_template("display_api.html", email=email, device_name=device_name, API_key=API_key)
+        else:
+            flash("You entered incorrect email. Please re-login!")
+            return redirect(url_for('login'))
+    return render_template('index.html')
 
 
 # Logout Page

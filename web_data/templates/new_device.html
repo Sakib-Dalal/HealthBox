@@ -30,16 +30,16 @@
           {% endif %}
         {% endwith %}
 
-        <form action="#" method="post">
+        <form action="{{ url_for('register_new_device', name=email) }}" method="post">
           <div class="mb-4">
             <label for="exampleInputEmail1" class="form-label text-danger">Conform email address</label>
-            <input type="email" name="email" required="required" class="form-control" placeholder="{{ email }}" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <input type="email" name="email" required="required" class="form-control" placeholder="ex. your_email@gmail.com" id="exampleInputEmail1" aria-describedby="emailHelp">
             <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
           </div>
 
           <div class="mb-4">
             <label for="exampleInputEmail1" class="form-label text-danger">Device Name</label>
-            <input type="string" name="device_name" required="required" class="form-control" placeholder="HealthBox 1">
+            <input type="string" name="device_name" required="required" class="form-control" placeholder="ex. HealthBox 1">
           </div>
 
           <button type="submit" class="btn btn-outline-danger">Add Device</button>
