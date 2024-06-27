@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-import csv
+import csv, os
 # Import your forms from the forms.py
 from forms import RegisterForm
 
@@ -43,42 +43,15 @@ class User(UserMixin, db.Model):
 with app.app_context():
     db.create_all()
 
-
 # Home Page
 @app.route('/')
 def home():
-    # # to get user data
-    # s = db.get_or_404(User, 1)
-    # print(s.email)
-    # print(s.password)
-    # print(s.device)
-    # print(s.device_API)
-   
-#    # to get all users list
-#     s = db.session.execute(db.select(User).order_by(User.id))
-#     r = s.scalars()
-#     for user in r:
-#         print(user.id, user.email, user.password, user.device, user.device_API)
-
-#     # read perticular record
-#     s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
-#     print(s.id)
-#     print(s.email)
-#     print(s.password)
-
-    # # update record
-    # s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
-    # s.email = 'sakib@gmail.com' # update value
-    # print("updated value")
-    # db.session.commit()
-
     # # update record
     # s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
     # s.device = None # update value
     # s.device_API = None
     # print("updated value")
     # db.session.commit()
-
     return render_template('index.html')
 
 # Login Page
@@ -87,11 +60,9 @@ def login():
     if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
-
         # Find user by email entered
         result = db.session.execute(db.select(User).where(User.email == email))
         user = result.scalar()
-
         if not user:
             flash("That email does not exist, please try again.")
             return redirect(url_for('login'))
@@ -112,7 +83,6 @@ def register():
         email = request.form.get('email')
         result = db.session.execute(db.select(User).where(User.email == email))
         user = result.scalar()
-
         if user:
             # User already exists
             flash("You've already signed up with that email, login instead!")
@@ -145,13 +115,11 @@ def features():
 @app.route('/userpage')
 @login_required
 def userpage():
-    print(current_user.email)
-    print(current_user.device)
-    print(current_user.device_API)
-
+    # print(current_user.email)
+    # print(current_user.device)
+    # print(current_user.device_API)
     device_list = str(current_user.device).split(',')
     device_api_list = str(current_user.device_API).split(",")
-
     device_list_length = len(device_list)
     # Passing the name from the current_user
     return render_template('userpage.html', name=current_user.email, device=device_list, device_API=device_api_list, length=device_list_length)
@@ -165,35 +133,32 @@ def new_device(email):
 # delete device 
 @app.route('/delete_device/<name>/<device_name>/<device_key>')
 @login_required
-def delete_device(name, device_name, device_key=0):
-    print(name)
-    print(device_name)
-    print(device_key)
-
+def delete_device(name, device_name, device_key):
+    # delete csv file
+    path = f"./data/{device_key}.csv"
+    os.remove(path)
     # Update data here
     record_to_be_updated = db.session.execute(db.select(User).where(User.email == name)).scalar()
     devices = str(record_to_be_updated.device)
     devices_api = str(record_to_be_updated.device_API)
-
     # using split to convert string to list
     device_list = devices.split(",")
     device_api_list = devices_api.split(",")
-
     # delete device name and device key
     device_list.remove(device_name)
     device_api_list.remove(device_key)
-
+    dl = ",".join(device_list)
+    da = ",".join(device_api_list)
     # convert to string
     # update record
-    record_to_be_updated.device =  ",".join(device_list)  # update value
-    record_to_be_updated.device_API = ",".join(device_api_list)
+    record_to_be_updated.device =  dl  # update value
+    record_to_be_updated.device_API = da
     print("delete value")
     db.session.commit()
-
     flash("Please Re-Login to overwrite changes.")
     return redirect(url_for('login'))
 
-# display api key
+# display created api key
 @app.route('/display_API/<email>/<device_name>/<API_key>')
 @login_required
 def display_api(email, device_name, API_key):
@@ -223,32 +188,20 @@ def register_new_device(name):
             # print data
             devices = str(record_to_be_updated.device)
             devices_api = str(record_to_be_updated.device_API)
-
-            if devices == "None"  or devices == "" and devices_api == "None" or devices_api == "":
-                device_list = [None]
-                device_api_list = [None]
-            else:
-                # using split to convert sting to list
-                device_list = devices.split(",")
-                device_api_list = devices_api.split(",")
-
+            # using split to convert sting to list
+            device_list = devices.split(",")
+            device_api_list = devices_api.split(",")
             # appending new device
             device_list.append(device_name)
             device_api_list.append(API_key)
+            dl = ",".join(device_list)
+            da =  ",".join(device_api_list)
             # convert to string
-             # update record
-            record_to_be_updated.device =  ",".join(device_list)  # update value
-            record_to_be_updated.device_API = ",".join(device_api_list)
+            # update record
+            record_to_be_updated.device =  dl  # update value
+            record_to_be_updated.device_API = da
             print("updated value")
             db.session.commit()
-            # new_user = User(
-            #     email = request.form.get('email'),
-            #     password = hash_and_salted_password
-            # )
-            # db.session.add(new_user)
-            # db.session.commit()
-            # Can redirect() and get name from the current_user
-            # return redirect(url_for('display_api', email=email, device_name=device_name, API_key=API_key))
             return render_template("display_api.html", email=email, device_name=device_name, API_key=API_key)
         else:
             flash("You entered incorrect email. Please re-login!")
