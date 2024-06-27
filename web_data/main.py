@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
+from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
@@ -6,7 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-import csv, os
+import csv, os, json
+import plotly.graph_objs as go
 # Import your forms from the forms.py
 from forms import RegisterForm
 
@@ -207,6 +208,25 @@ def register_new_device(name):
             flash("You entered incorrect email. Please re-login!")
             return redirect(url_for('login'))
     return render_template('index.html')
+
+# data section here
+# create plotly graph
+@app.route('/graph/<email>/<device_name>/<device_key>')
+@login_required
+def graph(email, device_name, device_key):
+    # Create some data for the plot
+    graph_data = {
+        'x': [1, 2, 3, 4, 5],
+        'y': [10, 15, 13, 17, 10],
+        'type': 'scatter',
+        'mode': 'lines+markers',
+        'name': 'Sample Data'
+    }
+
+    # Convert the data to JSON
+    graph_json = json.dumps(graph_data)
+    return render_template('graph.html', graph_json=graph_json, email=email, device_name=device_name, device_key=device_key)
+
 
 
 # Logout Page
