@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+import csv
 # Import your forms from the forms.py
 from forms import RegisterForm
 
@@ -46,37 +47,37 @@ with app.app_context():
 # Home Page
 @app.route('/')
 def home():
-    # to get user data
-    s = db.get_or_404(User, 1)
-    print(s.email)
-    print(s.password)
-    print(s.device)
-    print(s.device_API)
+    # # to get user data
+    # s = db.get_or_404(User, 1)
+    # print(s.email)
+    # print(s.password)
+    # print(s.device)
+    # print(s.device_API)
    
-   # to get all users list
-    s = db.session.execute(db.select(User).order_by(User.id))
-    r = s.scalars()
-    for user in r:
-        print(user.id, user.email, user.password, user.device, user.device_API)
+#    # to get all users list
+#     s = db.session.execute(db.select(User).order_by(User.id))
+#     r = s.scalars()
+#     for user in r:
+#         print(user.id, user.email, user.password, user.device, user.device_API)
 
-    # read perticular record
-    s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
-    print(s.id)
-    print(s.email)
-    print(s.password)
+#     # read perticular record
+#     s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
+#     print(s.id)
+#     print(s.email)
+#     print(s.password)
 
-    # update record
-    s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
-    s.email = 'sakib@gmail.com' # update value
-    print("updated value")
-    db.session.commit()
+    # # update record
+    # s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
+    # s.email = 'sakib@gmail.com' # update value
+    # print("updated value")
+    # db.session.commit()
 
-    # update record
-    s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
-    s.device = "Device 1" # update value
-    s.device_API = "D1"
-    print("updated value")
-    db.session.commit()
+    # # update record
+    # s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
+    # s.device = None # update value
+    # s.device_API = None
+    # print("updated value")
+    # db.session.commit()
 
     return render_template('index.html')
 
@@ -147,9 +148,13 @@ def userpage():
     print(current_user.email)
     print(current_user.device)
     print(current_user.device_API)
-    
+
+    device_list = str(current_user.device).split(',')
+    device_api_list = str(current_user.device_API).split(",")
+
+    device_list_length = len(device_list)
     # Passing the name from the current_user
-    return render_template('userpage.html', name=current_user.email, device=[current_user.device], device_API=[current_user.device_API])
+    return render_template('userpage.html', name=current_user.email, device=device_list, device_API=device_api_list, length=device_list_length)
 
 # add new device page
 @app.route('/new_device/<email>')
@@ -157,24 +162,85 @@ def userpage():
 def new_device(email):
     return render_template('new_device.html', email=email)
 
+# delete device 
+@app.route('/delete_device/<name>/<device_name>/<device_key>')
+@login_required
+def delete_device(name, device_name, device_key=0):
+    print(name)
+    print(device_name)
+    print(device_key)
+
+    # Update data here
+    record_to_be_updated = db.session.execute(db.select(User).where(User.email == name)).scalar()
+    devices = str(record_to_be_updated.device)
+    devices_api = str(record_to_be_updated.device_API)
+
+    # using split to convert string to list
+    device_list = devices.split(",")
+    device_api_list = devices_api.split(",")
+
+    # delete device name and device key
+    device_list.remove(device_name)
+    device_api_list.remove(device_key)
+
+    # convert to string
+    # update record
+    record_to_be_updated.device =  ",".join(device_list)  # update value
+    record_to_be_updated.device_API = ",".join(device_api_list)
+    print("delete value")
+    db.session.commit()
+
+    flash("Please Re-Login to overwrite changes.")
+    return redirect(url_for('login'))
+
 # display api key
 @app.route('/display_API/<email>/<device_name>/<API_key>')
+@login_required
 def display_api(email, device_name, API_key):
     return render_template("display_api.html", email=email, device_name=device_name, API_key=API_key)
 
 # create new device database page
 @app.route('/register_new_device/<name>', methods=['GET', 'POST'])
+@login_required
 def register_new_device(name):
     if request.method == 'POST':
         email = request.form.get('email')
         device_name = request.form.get('device_name')
-        result = db.session.execute(db.select(User).where(User.email == email))
-        user = result.scalar()
         api = f"{email}-{device_name}"
 
         if name == email:
+            # generate api_key
+            API_key = str(generate_password_hash(api, method='pbkdf2:sha256', salt_length=8))[-15:]
+            # create CSV file
+            file_path = f"./data/{API_key}.csv"
+            with open(file_path, 'w') as csv_file:
+                csv_write = csv.writer(csv_file)
+                csv_write.writerow(['Time', 'Blood_Pressure', 'ECG'])
+            print("file created")
 
-            API_key = generate_password_hash(api, method='pbkdf2:sha256', salt_length=8)
+            # Update data here
+            record_to_be_updated = db.session.execute(db.select(User).where(User.email == name)).scalar()
+            # print data
+            devices = str(record_to_be_updated.device)
+            devices_api = str(record_to_be_updated.device_API)
+
+            if devices == "None"  or devices == "" and devices_api == "None" or devices_api == "":
+                device_list = [None]
+                device_api_list = [None]
+            else:
+                # using split to convert sting to list
+                device_list = devices.split(",")
+                device_api_list = devices_api.split(",")
+
+            # appending new device
+            device_list.append(device_name)
+            device_api_list.append(API_key)
+            # convert to string
+             # update record
+            record_to_be_updated.device =  ",".join(device_list)  # update value
+            record_to_be_updated.device_API = ",".join(device_api_list)
+            print("updated value")
+            db.session.commit()
             # new_user = User(
             #     email = request.form.get('email'),
             #     password = hash_and_salted_password
@@ -197,4 +263,4 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="localhost", port=int("5000"), debug=True)
