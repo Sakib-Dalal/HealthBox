@@ -8,8 +8,9 @@ from sqlalchemy import Integer, String, Text
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import csv, os, json
 import plotly.graph_objs as go
+import plotly.utils
+import numpy as np
 # Import your forms from the forms.py
-from forms import RegisterForm
 
 
 app = Flask(__name__)
@@ -181,7 +182,7 @@ def register_new_device(name):
             file_path = f"./data/{API_key}.csv"
             with open(file_path, 'w') as csv_file:
                 csv_write = csv.writer(csv_file)
-                csv_write.writerow(['Time', 'Blood_Pressure', 'ECG'])
+                csv_write.writerow(['Time', 'Blood_Pressure', 'ECG', 'Body_Temperature'])
             print("file created")
 
             # Update data here
@@ -214,19 +215,101 @@ def register_new_device(name):
 @app.route('/graph/<email>/<device_name>/<device_key>')
 @login_required
 def graph(email, device_name, device_key):
+    x_data = list(map(int, np.random.randint(0, 100, 50)))
+    y_data = list(map(int, np.random.randint(0, 100, 50)))
     # Create some data for the plot
-    graph_data = {
-        'x': [1, 2, 3, 4, 5],
-        'y': [10, 15, 13, 17, 10],
+    scatter_data = {
+        'x': x_data,
+        'y': y_data,
         'type': 'scatter',
-        'mode': 'lines+markers',
-        'name': 'Sample Data'
+        'mode': 'markers',
+        'marker': {'color': 'red',
+                'size': x_data},  # Set the color here
+        'name': 'Sample Data',
     }
+
+    # Create some JSON data for pie chart
+    pie_data = {
+        'title': "Pie Graph",
+        #"textinfo": "percent+label",
+        'labels': x_data,
+        'values': y_data,
+        'hole':0.5,
+        'type': 'pie',
+        'name': 'Pie Data'
+    }
+
+    bar_data = {
+        'x': x_data,
+        'y': y_data,
+        'type': 'bar',
+        'marker': {'color': 'red'},
+        'name': 'Bar Data'
+    }
+
+    # 3D graph
+     # Generate random data
+    np.random.seed(1)
+    N = 70
+
+    fig = go.Figure(data=[go.Mesh3d(
+        x=(70 * np.random.randn(N)),
+        y=(55 * np.random.randn(N)),
+        z=(40 * np.random.randn(N)),
+        opacity=0.5,
+        color='rgba(255, 0, 0, 0.6)'  # Red color with opacity
+    )])
+
+    fig.update_layout(
+        scene=dict(
+            xaxis=dict(nticks=4, range=[-100, 100]),
+            yaxis=dict(nticks=4, range=[None, 100]),
+            zaxis=dict(nticks=4, range=[-100, None]),
+        ),
+        width=950,
+        margin=dict(r=20, l=10, b=10, t=10)
+    )
+
+    # Convert the figure to JSON
+    
+    #graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    graph_data = [scatter_data, pie_data, bar_data, fig]
+
+    # Convert the data to JSON
+    graph_json = json.dumps(graph_data, cls=plotly.utils.PlotlyJSONEncoder)
+    
+    return render_template('graph.html', graph_json=graph_json, email=email, device_name=device_name, device_key=device_key)
+
+# Table page
+@app.route('/table/<email>/<device_name>/<device_key>')
+@login_required
+def table(email, device_name, device_key):
+     # Define table data
+    header = dict(values=['A', 'B', 'C', 'D'],
+                    align='center',
+                    font=dict(color='white', size=12),
+                    fill=dict(color='#E72929'))
+
+    cells = dict(values=[[1, 2, 3, 4],
+                         [10, 20, 30, 40],
+                         [100, 200, 300, 400],
+                         [1000, 2000, 3000, 4000]],
+                align='center',
+                font=dict(color='#E72929', size=12),
+                fill=dict(color=["#EEEEEE", "#EEEEEE"]))
+
+    table_data = {
+        'type': 'table',
+        'header': header,
+        'cells': cells
+    }
+
+    graph_data = [table_data]
 
     # Convert the data to JSON
     graph_json = json.dumps(graph_data)
-    return render_template('graph.html', graph_json=graph_json, email=email, device_name=device_name, device_key=device_key)
-
+    return render_template('table.html', graph_json=graph_json)
 
 
 # Logout Page
@@ -236,4 +319,4 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=int("5000"), debug=True)
+    app.run(debug=True)

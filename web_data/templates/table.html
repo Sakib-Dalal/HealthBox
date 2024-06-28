@@ -21,25 +21,16 @@
         
         </div>
       </nav>
-
-    <div id="bar-chart" style="width:100%;height:100%;display:inline-block;"></div>
-    <div id="scatter-plot" style="width:100%;height:100%;display:inline-block;"></div>
-    <div id="3d-graph" style="width:100%;height:100%;"></div>
-    <div id="pie-chart" style="width:100%;height:100%;display:inline-block;"></div>
-    <script>
-        // Get the JSON data for the graph from Flask
-        var graph_json = {{ graph_json|tojson|safe }};
-        // Parse the JSON data
-        var graph_data = JSON.parse(graph_json);
-        // Display the 3d graph
-        Plotly.newPlot('3d-graph', graph_data[3]);
-        // Display the scatter plot
-        Plotly.newPlot('scatter-plot', [graph_data[0]]);
-        // Display the pie chart
-        Plotly.newPlot('pie-chart', [graph_data[1]]);
-
-        Plotly.newPlot('bar-chart', [graph_data[2]])
-    </script>
+      
+      <div id="table" style="width:100%;height:100%;"></div>
+      <script>
+          // Get the JSON data for the table from Flask
+          var graph_json = {{ graph_json|tojson|safe }};
+          // Parse the JSON data
+          var graph_data = JSON.parse(graph_json);
+          // Display the table
+          Plotly.newPlot('table', graph_data);
+      </script>
 
 <div class="text-center mb-5 text-danger" style="padding-top: 150px;">
     <p> HealthBox © 2024 </p>
