@@ -146,6 +146,7 @@ def delete_device(name, device_name, device_key):
     # using split to convert string to list
     device_list = devices.split(",")
     device_api_list = devices_api.split(",")
+    print(device_name, device_key)
     # delete device name and device key
     device_list.remove(device_name)
     device_api_list.remove(device_key)
@@ -266,8 +267,9 @@ def graph(email, device_name, device_key):
             yaxis=dict(nticks=4, range=[None, 100]),
             zaxis=dict(nticks=4, range=[-100, None]),
         ),
-        width=950,
-        margin=dict(r=20, l=10, b=10, t=10)
+        width=1200,
+        height=900,
+        margin=dict(r=20, l=100, b=100, t=10)
     )
 
     # Convert the figure to JSON
@@ -311,12 +313,37 @@ def table(email, device_name, device_key):
     graph_json = json.dumps(graph_data)
     return render_template('table.html', graph_json=graph_json)
 
-
 # Logout Page
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+# API page Here
+
+# HTTP GET Read Record
+@app.route('/healthbox/api', methods=["GET"])
+def api():
+    data = {
+        
+        "DeviceData":{
+            "id": [1],
+            "Time": ["12:00"],
+            "BloodPressure": [120],
+            "ECG": [200],
+            "BodyTemperature": [35]
+        },
+        "email": "email@gmail.com",
+        "DeviceName": "Device 1",
+    }
+    if data:
+        return jsonify(data=data)
+    else:
+        return jsonify(error={"Not Found: Data or API key not found."})
+
+# HTTP POST - create new record
+# @app.route()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
