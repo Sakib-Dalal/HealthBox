@@ -1,18 +1,14 @@
-from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, jsonify
+from flask import Flask, render_template, request, url_for, redirect, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_bootstrap import Bootstrap5
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import Integer, String, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import Integer, String
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import csv, os, json
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
-import numpy as np
-# Import your forms from the forms.py
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -49,12 +45,6 @@ with app.app_context():
 # Home Page
 @app.route('/')
 def home():
-    # # update record
-    # s = db.session.execute(db.select(User).where(User.email == 'sakib@gmail.com')).scalar()
-    # s.device = None # update value
-    # s.device_API = None
-    # print("updated value")
-    # db.session.commit()
     return render_template('index.html')
 
 # Login Page
@@ -118,9 +108,6 @@ def features():
 @app.route('/userpage')
 @login_required
 def userpage():
-    # print(current_user.email)
-    # print(current_user.device)
-    # print(current_user.device_API)
     device_list = str(current_user.device).split(',')
     device_api_list = str(current_user.device_API).split(",")
     device_list_length = len(device_list)
@@ -235,7 +222,7 @@ def graph(email, device_name, device_key):
         'type': 'scatter',
         'mode': 'lines+markers',
         'marker': {'color': 'red',
-                'size': blood_pressure},  # Set the color here
+                'size': blood_pressure}, 
         'name': 'Sample Data',
     }
 
@@ -252,7 +239,7 @@ def graph(email, device_name, device_key):
         'y': body_temperature,
         'type': 'scatter',
         'mode': 'lines+markers',
-        'marker': {'color': 'gray',
+        'marker': {'color': "gray",
                 'size': body_temperature},  # Set the color here
         'name': 'Sample Data',
     }
@@ -267,21 +254,18 @@ def graph(email, device_name, device_key):
 
     # Create some JSON data for pie chart
     MeanPieChart = {
-        'title': "Pie Graph",
-        #"textinfo": "percent+label",
+        'title': "Mean Graph",
+        "textinfo": "label",
         'labels': labels,
         'values': values,
         'hole':0.5,
         'type': 'pie',
-        'name': 'Pie Data'
+        'name': 'Pie Data',
+        "textposition": "outside"
     }
 
     # 3D graph
-    #  # Generate random data
-    # np.random.seed(1)
-    # N = 70
-
-    fig = go.Figure(data=[go.Mesh3d(
+    graph = go.Figure(data=[go.Mesh3d(
         x=time,
         y=blood_pressure,
         z=body_temperature,
@@ -289,67 +273,46 @@ def graph(email, device_name, device_key):
         color='rgba(255, 0, 0, 0.6)'  # Red color with opacity
     )])
 
-    fig.update_layout(
+    graph.update_layout(
         scene=dict(
-            xaxis=dict(nticks=4, range=[-100, 100]),
-            yaxis=dict(nticks=4, range=[None, 100]),
-            zaxis=dict(nticks=4, range=[-100, None]),
+            xaxis=dict(nticks=4, range=[-100, 100], title="Time"),
+            yaxis=dict(nticks=4, range=[None, 100], title="Blood Pressure"),
+            zaxis=dict(nticks=4, range=[-100, None], title="Body Temperature"),
         ),
-        width=1200,
-        height=900,
-        margin=dict(r=20, l=100, b=100, t=10)
+     
+        margin=dict(r=0, l=0, b=0, t=0)
     )
 
-    # Create 3D scatter plot
-    # fig = go.Figure(data=[go.Scatter3d(
-    #     x=time,
-    #     y=blood_pressure,
-    #     z=ecg,
-    #     mode='markers',
-    #     marker=dict(
-    #         size=12,
-    #         color=blood_pressure,                # set color to an array/list of desired values
-    #         colorscale='Viridis',   # choose a colorscale
-    #         opacity=0.8
-    #     )
-    # )])
+    #Create 3D scatter plot
+    scatter_graph = go.Figure(data=[go.Scatter3d(
+        x=time,
+        y=blood_pressure,
+        z=ecg,
+        mode='lines+markers',
+        marker=dict(
+            size=12,
+            color=blood_pressure,
+            colorscale='Viridis',
+            opacity=0.8
+        )
+    )])
 
-    # # Update layout
-    # fig.update_layout(
-    #     scene=dict(
-    #         xaxis=dict(title='Time'),
-    #         yaxis=dict(title='Blood Pressure'),
-    #         zaxis=dict(title='ECG'),
-    #     ),
-    #     margin=dict(l=0, r=0, b=0, t=0),
-    # )
-
-   # Example of 3D Line plot
-    # fig = go.Figure(data=[go.Scatter3d(
-    #     x=time,
-    #     y=blood_pressure,
-    #     z=ecg,
-    #     mode='lines',
-    #     line=dict(
-    #         color=body_temperature,
-    #         width=4
-    #     )
-    # )])
-
-    # fig.update_layout(scene=dict(
-    #                     xaxis_title='Time',
-    #                     yaxis_title='Blood Pressure',
-    #                     zaxis_title='ECG'),
-    #                 margin=dict(r=0, l=0, b=0, t=0))
-
+    # Update layout
+    scatter_graph.update_layout(
+        scene=dict(
+            xaxis=dict(title='Time'),
+            yaxis=dict(title='Blood Pressure'),
+            zaxis=dict(title='ECG'),
+        ),
+        margin=dict(l=0, r=0, b=0, t=0),
+    )
 
     # Convert the figure to JSON
-    graph_data = [BloodPressureGraph, BloodPressureBarGraph, BodyTemperatureGraph, BodyTemperatureBarGraph, MeanPieChart, fig]
-
+    graph_data = [BloodPressureGraph, BloodPressureBarGraph, BodyTemperatureGraph, BodyTemperatureBarGraph, MeanPieChart, graph, scatter_graph]
     # Convert the data to JSON
     graph_json = json.dumps(graph_data, cls=plotly.utils.PlotlyJSONEncoder)
     
-    return render_template('graph.html', graph_json=graph_json, email=email, device_name=device_name, device_key=device_key)
+    return render_template('graph.html', graph_json=graph_json, email=email, device_name=device_name)
 
 # Table page
 @app.route('/table/<email>/<device_name>/<device_key>')
@@ -380,12 +343,10 @@ def table(email, device_name, device_key):
         'header': header,
         'cells': cells
     }
-
     graph_data = [table_data]
-
     # Convert the data to JSON
     graph_json = json.dumps(graph_data)
-    return render_template('table.html', graph_json=graph_json)
+    return render_template('table.html', graph_json=graph_json, email=email, device_name=device_name)
 
 # Logout Page
 @app.route('/logout')
@@ -394,32 +355,13 @@ def logout():
     return redirect(url_for('home'))
 
 # API page Here
-
 # HTTP GET Read Record
+# example: http://127.0.0.1:5000/healthbox/api
 @app.route('/healthbox/api/<email>/<device_name>/<api>', methods=["GET"])
 def api(email, device_name, api):
     # Open csv file here
     file_path = f"./data/{api}.csv"
     fileData = pd.read_csv(file_path)
-
-    # data = {
-    #     "DeviceData":{
-    #         "id": 1,
-    #         "Time": ["12:00"],
-    #         "BloodPressure": [120],
-    #         "ECG": [200],
-    #         "BodyTemperature": [35]
-    #     },
-    #     "email": "email@gmail.com",
-    #     "DeviceName": "Device 1",
-    # }
-
-    # data = {
-    #     "DeviceData":fileData.to_dict(orient="records"),
-    #     "email": email,
-    #     "DeviceName": device_name
-    # }
-
     data = {
         "index": fileData.index.tolist(),
         "Blood_Pressure": fileData["Blood_Pressure"].tolist(),
@@ -427,15 +369,42 @@ def api(email, device_name, api):
         "ECG": fileData["ECG"].tolist(),
         "Time": fileData["Time"].tolist()
     }
-
     if data:
         return jsonify(data=data)
     else:
         return jsonify(error={"Not Found: Data or API key not found."})
 
 # HTTP POST - create new record
-# @app.route()
+# example: http://127.0.0.1:5000/healthbox/api/add/6e3c96dc2d72cb7?time=12&bloodpressure=100&ecg=100&bodytemperature=100
+@app.route("/healthbox/api/add/<api_key>", methods=['POST'])
+def add_data(api_key):
+    file_path = f"./data/{api_key}.csv"
 
+    Time = request.args.get("time")
+    BloodPressure = request.args.get("bloodpressure")
+    ECG = request.args.get("ecg")
+    BodyTemperature = request.args.get("bodytemperature")
+
+    new_data = [Time, BloodPressure, ECG, BodyTemperature]
+
+    try:
+        # Read existing data from the CSV file
+        with open(file_path, mode='r') as file:
+            reader = csv.reader(file)
+            existing_data = list(reader)
+
+        #Append the new data
+        existing_data.append(new_data)
+
+        # Write the updated data back to the CSV file
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(existing_data)
+            print(new_data)
+
+        return jsonify(response={"success": "Successfully add the data."})
+    except:
+        return jsonify(error={"error": "Data not added. Please check API key."})
 
 if __name__ == '__main__':
     app.run(debug=True)

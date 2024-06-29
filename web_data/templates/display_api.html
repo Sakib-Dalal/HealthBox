@@ -12,8 +12,6 @@
         </div>
       </nav>
 
-    
-
       <!--Info Here-->
       <div class="mb-5 mt-5 card border border-danger fw-light">
         <div class="card-header fs-4 fw-light text-dark">
@@ -21,9 +19,9 @@
         </div>
         <div class="card-body">
             <h5 class="card-title text-danger fs-5 fw-light">Device Name: {{ device_name }}</h5>
-            <p class="card-text text-secondary">Please copy and paste the given API key in your HealthBox device.</p>
+            <p class="card-text text-secondary">Please copy and paste the given URL API key in your HealthBox device.</p>
             <div class="alert alert-danger" role="alert">
-                {{ API_key }}
+                http://127.0.0.1/healthbox/api/add/{{ API_key }}
             </div>
         </div>
       </div>
