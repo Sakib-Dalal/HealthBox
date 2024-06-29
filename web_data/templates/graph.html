@@ -22,23 +22,87 @@
         </div>
       </nav>
 
-    <div id="bar-chart" style="width:100%;height:100%;display:inline-block;"></div>
-    <div id="scatter-plot" style="width:100%;height:100%;display:inline-block;"></div>
-    <div id="3d-graph" style="width:100%;height:100%;"></div>
-    <div id="pie-chart" style="width:100%;height:100%;display:inline-block;"></div>
+
+      <!--Blood Pressure Graph-->
+      <div class="card text-center mt-5 border-danger">
+        <div class="card-header">
+          Featured
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          <div id="BloodPressureGraph" style="width:100%;height:100%;display:inline-block;"></div>
+          <div id="BloodPressureBarGraph" style="width:100%;height:100%;display:inline-block;"></div>
+        </div>
+        <div class="card-footer text-body-secondary">
+          2 days ago
+        </div>
+      </div>
+
+    <!--Body Temperature Graph-->
+      <div class="card text-center mt-5 border-danger">
+        <div class="card-header">
+          Featured
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          <div id="BodyTemperatureGraph" style="width:100%;height:100%;display:inline-block;"></div>
+          <div id="BodyTemperatureBarGraph" style="width:100%;height:100%;display:inline-block;"></div>
+        </div>
+        <div class="card-footer text-body-secondary">
+          2 days ago
+        </div>
+      </div>
+
+    <!--Mean Pie Chart-->
+      <div class="card text-center mt-5 border-danger">
+        <div class="card-header">
+          Featured
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          <div id="MeanPieChart" style="width:100%;height:100%;display:inline-block;"></div>
+        </div>
+        <div class="card-footer text-body-secondary">
+          2 days ago
+        </div>
+      </div>
+
+
+      <div class="card text-center mt-5 border-danger">
+        <div class="card-header">
+          Featured
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <div id="3d-graph" style="width:100%;height:100%;"></div>
+        </div>
+        <div class="card-footer text-body-secondary">
+          2 days ago
+        </div>
+      </div>
+
+
     <script>
         // Get the JSON data for the graph from Flask
         var graph_json = {{ graph_json|tojson|safe }};
         // Parse the JSON data
         var graph_data = JSON.parse(graph_json);
-        // Display the 3d graph
-        Plotly.newPlot('3d-graph', graph_data[3]);
-        // Display the scatter plot
-        Plotly.newPlot('scatter-plot', [graph_data[0]]);
-        // Display the pie chart
-        Plotly.newPlot('pie-chart', [graph_data[1]]);
+        
+        // Blood Pressure Graph
+        Plotly.newPlot('BloodPressureGraph', [graph_data[0]]);
+        Plotly.newPlot('BloodPressureBarGraph', [graph_data[1]]);
+        // Body Temperature Graph
+        Plotly.newPlot('BodyTemperatureGraph', [graph_data[2]]);
+        Plotly.newPlot('BodyTemperatureBarGraph', [graph_data[3]]);
+        // Mean Pie Chart
+        Plotly.newPlot('MeanPieChart', [graph_data[4]]);
 
-        Plotly.newPlot('bar-chart', [graph_data[2]])
+        // Display the 3d graph
+        Plotly.newPlot('3d-graph', graph_data[5]);
     </script>
 
 <div class="text-center mb-5 text-danger" style="padding-top: 150px;">

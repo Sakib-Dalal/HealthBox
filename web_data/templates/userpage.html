@@ -94,7 +94,7 @@
                     <p class="card-text text-secondary">Clicking "View Graph" opens and displays the graph. "View Raw Data" shows the data in a table, while "View JSON Data" presents the data in JSON format.</p>
                     <a href="{{ url_for('graph', email=name, device_name=device[i], device_key=device_API[i]) }}" class="btn btn-danger px-3"><img class="mx-2" src="./../static/graph.svg" height="28" width="28" />View Graph</a>
                     <a href="{{ url_for('table', email=name, device_name=device[i], device_key=device_API[i]) }}" class="btn btn-dark px-3 mx-2"><img class="mx-2" src="./../static/data.svg" height="25" width="25" />View Raw Data</a>
-                    <a href="{{ url_for('api') }}" class="btn btn-secondary px-3"><img class="mx-2" src="./../static/json.svg" height="25" width="25" />View JSON Data</a>
+                    <a href="{{ url_for('api', email=name, device_name=device[i], api=device_API[i]) }}" class="btn btn-secondary px-3"><img class="mx-2" src="./../static/json.svg" height="25" width="25" />View JSON Data</a>
                 </div>
             </div>
             {% endfor %}

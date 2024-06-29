@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import csv, os, json
+import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
 import numpy as np
@@ -216,47 +217,74 @@ def register_new_device(name):
 @app.route('/graph/<email>/<device_name>/<device_key>')
 @login_required
 def graph(email, device_name, device_key):
-    x_data = list(map(int, np.random.randint(0, 100, 50)))
-    y_data = list(map(int, np.random.randint(0, 100, 50)))
-    # Create some data for the plot
-    scatter_data = {
-        'x': x_data,
-        'y': y_data,
+    # read csv file
+    file_path = f"./data/{device_key}.csv"
+    db = pd.read_csv(file_path)
+
+    index = db.index.to_list()
+    labels = db.columns.to_list()
+    values = db.mean().to_list()
+    time = db.Time.to_list()
+    blood_pressure = db.Blood_Pressure.to_list()
+    ecg = db.ECG.to_list()
+    body_temperature = db.Body_Temperature.to_list()
+    
+    BloodPressureGraph = {
+        'x': time,
+        'y': blood_pressure,
         'type': 'scatter',
-        'mode': 'markers',
+        'mode': 'lines+markers',
         'marker': {'color': 'red',
-                'size': x_data},  # Set the color here
+                'size': blood_pressure},  # Set the color here
         'name': 'Sample Data',
     }
 
+    BloodPressureBarGraph = {
+        'x': time,
+        'y': blood_pressure,
+        'type': 'bar',
+        'marker': {'color': '#F45050'},
+        'name': 'Bar Data'
+    }
+
+    BodyTemperatureGraph = {
+        'x': time,
+        'y': body_temperature,
+        'type': 'scatter',
+        'mode': 'lines+markers',
+        'marker': {'color': 'gray',
+                'size': body_temperature},  # Set the color here
+        'name': 'Sample Data',
+    }
+
+    BodyTemperatureBarGraph = {
+        'x': time,
+        'y': body_temperature,
+        'type': 'bar',
+        'marker': {'color': 'gray'},
+        'name': 'Bar Data'
+    }
+
     # Create some JSON data for pie chart
-    pie_data = {
+    MeanPieChart = {
         'title': "Pie Graph",
         #"textinfo": "percent+label",
-        'labels': x_data,
-        'values': y_data,
+        'labels': labels,
+        'values': values,
         'hole':0.5,
         'type': 'pie',
         'name': 'Pie Data'
     }
 
-    bar_data = {
-        'x': x_data,
-        'y': y_data,
-        'type': 'bar',
-        'marker': {'color': 'red'},
-        'name': 'Bar Data'
-    }
-
     # 3D graph
-     # Generate random data
-    np.random.seed(1)
-    N = 70
+    #  # Generate random data
+    # np.random.seed(1)
+    # N = 70
 
     fig = go.Figure(data=[go.Mesh3d(
-        x=(70 * np.random.randn(N)),
-        y=(55 * np.random.randn(N)),
-        z=(40 * np.random.randn(N)),
+        x=time,
+        y=blood_pressure,
+        z=body_temperature,
         opacity=0.5,
         color='rgba(255, 0, 0, 0.6)'  # Red color with opacity
     )])
@@ -272,11 +300,51 @@ def graph(email, device_name, device_key):
         margin=dict(r=20, l=100, b=100, t=10)
     )
 
-    # Convert the figure to JSON
-    
-    #graph_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    # Create 3D scatter plot
+    # fig = go.Figure(data=[go.Scatter3d(
+    #     x=time,
+    #     y=blood_pressure,
+    #     z=ecg,
+    #     mode='markers',
+    #     marker=dict(
+    #         size=12,
+    #         color=blood_pressure,                # set color to an array/list of desired values
+    #         colorscale='Viridis',   # choose a colorscale
+    #         opacity=0.8
+    #     )
+    # )])
 
-    graph_data = [scatter_data, pie_data, bar_data, fig]
+    # # Update layout
+    # fig.update_layout(
+    #     scene=dict(
+    #         xaxis=dict(title='Time'),
+    #         yaxis=dict(title='Blood Pressure'),
+    #         zaxis=dict(title='ECG'),
+    #     ),
+    #     margin=dict(l=0, r=0, b=0, t=0),
+    # )
+
+   # Example of 3D Line plot
+    # fig = go.Figure(data=[go.Scatter3d(
+    #     x=time,
+    #     y=blood_pressure,
+    #     z=ecg,
+    #     mode='lines',
+    #     line=dict(
+    #         color=body_temperature,
+    #         width=4
+    #     )
+    # )])
+
+    # fig.update_layout(scene=dict(
+    #                     xaxis_title='Time',
+    #                     yaxis_title='Blood Pressure',
+    #                     zaxis_title='ECG'),
+    #                 margin=dict(r=0, l=0, b=0, t=0))
+
+
+    # Convert the figure to JSON
+    graph_data = [BloodPressureGraph, BloodPressureBarGraph, BodyTemperatureGraph, BodyTemperatureBarGraph, MeanPieChart, fig]
 
     # Convert the data to JSON
     graph_json = json.dumps(graph_data, cls=plotly.utils.PlotlyJSONEncoder)
@@ -287,19 +355,25 @@ def graph(email, device_name, device_key):
 @app.route('/table/<email>/<device_name>/<device_key>')
 @login_required
 def table(email, device_name, device_key):
+    # read csv file
+    file_path = f"./data/{device_key}.csv"
+    db = pd.read_csv(file_path)
+
      # Define table data
-    header = dict(values=['A', 'B', 'C', 'D'],
+    header = dict(values=["Index"]+db.columns.to_list(),
                     align='center',
-                    font=dict(color='white', size=12),
+                    font=dict(color='white', size=14),
                     fill=dict(color='#E72929'))
 
-    cells = dict(values=[[1, 2, 3, 4],
-                         [10, 20, 30, 40],
-                         [100, 200, 300, 400],
-                         [1000, 2000, 3000, 4000]],
+    cells = dict(values=[db.index.to_list(),
+                        db.Time.to_list(),
+                        db.Blood_Pressure.to_list(),
+                        db.ECG.to_list(),
+                        db.Body_Temperature.to_list()],
+
                 align='center',
-                font=dict(color='#E72929', size=12),
-                fill=dict(color=["#EEEEEE", "#EEEEEE"]))
+                font=dict(color='#E72929', size=14),
+                fill=dict(color=["#EEEEEE", "#FEF2F4"]))
 
     table_data = {
         'type': 'table',
@@ -322,20 +396,38 @@ def logout():
 # API page Here
 
 # HTTP GET Read Record
-@app.route('/healthbox/api', methods=["GET"])
-def api():
+@app.route('/healthbox/api/<email>/<device_name>/<api>', methods=["GET"])
+def api(email, device_name, api):
+    # Open csv file here
+    file_path = f"./data/{api}.csv"
+    fileData = pd.read_csv(file_path)
+
+    # data = {
+    #     "DeviceData":{
+    #         "id": 1,
+    #         "Time": ["12:00"],
+    #         "BloodPressure": [120],
+    #         "ECG": [200],
+    #         "BodyTemperature": [35]
+    #     },
+    #     "email": "email@gmail.com",
+    #     "DeviceName": "Device 1",
+    # }
+
+    # data = {
+    #     "DeviceData":fileData.to_dict(orient="records"),
+    #     "email": email,
+    #     "DeviceName": device_name
+    # }
+
     data = {
-        
-        "DeviceData":{
-            "id": [1],
-            "Time": ["12:00"],
-            "BloodPressure": [120],
-            "ECG": [200],
-            "BodyTemperature": [35]
-        },
-        "email": "email@gmail.com",
-        "DeviceName": "Device 1",
+        "index": fileData.index.tolist(),
+        "Blood_Pressure": fileData["Blood_Pressure"].tolist(),
+        "Body_Temperature": fileData["Body_Temperature"].tolist(),
+        "ECG": fileData["ECG"].tolist(),
+        "Time": fileData["Time"].tolist()
     }
+
     if data:
         return jsonify(data=data)
     else:
