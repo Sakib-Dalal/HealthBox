@@ -9,6 +9,7 @@ import csv, os, json
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.utils
+import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -193,7 +194,10 @@ def register_new_device(name):
             record_to_be_updated.device_API = da
             print("updated value")
             db.session.commit()
-            return render_template("display_api.html", email=email, device_name=device_name, API_key=API_key)
+            # Get the public IP address
+            response = requests.get('https://api.ipify.org?format=json')
+            public_ip = response.json()['ip']
+            return render_template("display_api.html", email=email, device_name=device_name, API_key=API_key, public_ip=public_ip)
         else:
             flash("You entered incorrect email. Please re-login!")
             return redirect(url_for('login'))
@@ -325,7 +329,7 @@ def table(email, device_name, device_key):
      # Define table data
     header = dict(values=["Index"]+db.columns.to_list(),
                     align='center',
-                    font=dict(color='white', size=14),
+                    font=dict(color='white', size=12),
                     fill=dict(color='#E72929'))
 
     cells = dict(values=[db.index.to_list(),
@@ -335,7 +339,7 @@ def table(email, device_name, device_key):
                         db.Body_Temperature.to_list()],
 
                 align='center',
-                font=dict(color='#E72929', size=14),
+                font=dict(color='#E72929', size=12),
                 fill=dict(color=["#EEEEEE", "#FEF2F4"]))
 
     table_data = {
@@ -407,4 +411,4 @@ def add_data(api_key):
         return jsonify(error={"error": "Data not added. Please check API key."})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=80)

@@ -21,7 +21,7 @@
             <h5 class="card-title text-danger fs-5 fw-light">Device Name: {{ device_name }}</h5>
             <p class="card-text text-secondary">Please copy and paste the given URL API key in your HealthBox device.</p>
             <div class="alert alert-danger" role="alert">
-                http://127.0.0.1/healthbox/api/add/{{ API_key }}
+                http://{{ public_ip }}/healthbox/api/add/{{ API_key }}
             </div>
         </div>
       </div>
